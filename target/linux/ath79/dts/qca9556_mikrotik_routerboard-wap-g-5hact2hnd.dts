@@ -11,7 +11,6 @@
 	model = "MikroTik RouterBOARD wAP G-5HacT2HnD";
 
 	aliases {
-		mdio-gpio1 = &mdio2;
 		serial0 = &uart;
 	};
 
@@ -25,23 +24,27 @@
 			debounce-interval = <60>;
 		};
 	};
+};
 
-	mdio2: mdio {
-		compatible = "virtual,mdio-gpio";
+&pinmux {
+	mdio_pins: mdio_pins {
+		/* GPIO 11 as MDIO(0x20), GPIO 12 as MDC(0x21) */
+		pinctrl-single,bits = <0x8 0x20000000 0xff000000>,
+				      <0xc 0x00000021 0x000000ff>;
+	};
+};
 
-		gpios = <&gpio 12 GPIO_ACTIVE_HIGH>, /* MDC */
-			<&gpio 11 GPIO_ACTIVE_HIGH>; /* MDIO */
-		#address-cells = <1>;
-		#size-cells = <0>;
+&mdio1 {
+	status = "okay";
 
-		phy0: ethernet-phy@0 {
-			reg = <0>;
-			device_type = "ethernet-phy";
+	pinctrl-names = "default";
+	pinctrl-0 = <&mdio_pins>;
 
-			phy-mode = "sgmii";
+	phy-mask = <0x1>;
 
-			at803x-override-sgmii-link-check;
-		};
+	phy0: ethernet-phy@0 {
+		reg = <0>;
+		at803x-override-sgmii-link-check;
 	};
 };
 
