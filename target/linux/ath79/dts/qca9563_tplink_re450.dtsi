@@ -12,7 +12,6 @@
 		led-failsafe = &led_power;
 		led-running = &led_power;
 		led-upgrade = &led_power;
-		mdio-gpio0 = &mdio2;
 	};
 
 	leds {
@@ -87,21 +86,6 @@
 			debounce-interval = <60>;
 		};
 	};
-
-	mdio2: mdio {
-		compatible = "virtual,mdio-gpio";
-
-		gpios = <&gpio 3 GPIO_ACTIVE_HIGH>, /* MDC */
-			<&gpio 4 GPIO_ACTIVE_HIGH>; /* MDIO */
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		phy4: ethernet-phy@4 {
-			reg = <4>;
-			device_type = "ethernet-phy";
-			reset-gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
-		};
-	};
 };
 
 &pcie {
@@ -127,6 +111,28 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 		};
+	};
+};
+
+&pinmux {
+	mdio_pins: mdio_pins {
+		/* GPIO 3 as MDC(0x21), GPIO 4 as MDIO(0x20) */
+		pinctrl-single,bits = <0x0 0x21000000 0xff000000>,
+				      <0x4 0x00000020 0x000000ff>;
+	};
+};
+
+&mdio0 {
+	status = "okay";
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&mdio_pins>;
+
+	phy-mask = <0x10>;
+
+	phy4: ethernet-phy@4 {
+		reg = <4>;
+		reset-gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
 	};
 };
 
