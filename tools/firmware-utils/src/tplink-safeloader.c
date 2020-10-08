@@ -1318,7 +1318,7 @@ static struct device_info boards[] = {
 		.support_list =
 			"SupportList:\r\n"
 			"EAP225-Outdoor(TP-Link|UN|AC1200-D):1.0\r\n",
-		.support_trail = '\xff',
+		.part_trail = PART_TRAIL_NONE,
 		.soft_ver = NULL,
 		.soft_ver_compat_level = 1,
 
@@ -1347,7 +1347,7 @@ static struct device_info boards[] = {
 		.support_list =
 			"SupportList:\r\n"
 			"EAP225(TP-Link|UN|AC1350-D):3.0\r\n",
-		.support_trail = '\xff',
+		.part_trail = PART_TRAIL_NONE,
 		.soft_ver = NULL,
 		.soft_ver_compat_level = 1,
 
@@ -1405,7 +1405,7 @@ static struct device_info boards[] = {
 		.support_list =
 			"SupportList:\r\n"
 			"EAP245(TP-LINK|UN|AC1750-D):1.0\r\n",
-		.support_trail = '\xff',
+		.part_trail = PART_TRAIL_NONE,
 		.soft_ver = NULL,
 
 		.partitions = {
