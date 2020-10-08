@@ -85,6 +85,7 @@ struct device_info {
 	const char *id;
 	const char *vendor;
 	const char *support_list;
+	const char *product_info;
 	enum partition_trail_value part_trail;
 	const char *soft_ver;
 	uint32_t soft_ver_compat_level;
@@ -1341,6 +1342,47 @@ static struct device_info boards[] = {
 		.last_sysupgrade_partition = "file-system"
 	},
 
+	/** Firmware layout for the EAP225-Outdoor v1 CA */
+	{
+		.id     = "EAP225-OUTDOOR-V1-CA",
+		.support_list =
+			"SupportList:\r\n"
+			"EAP225-Outdoor(TP-Link|UN|AC1200-D):1.0\r\n",
+		.product_info =
+			"EAP225-Outdoor(TP-Link|UN|AC1200-D):1.0\r\n"
+			"key=BgIAAAAkAABSU0ExAAQAAAEAAQDZtUNzD6KsxO4Tfx/Sp8S7"
+			"w8TwPWwoppXy77wSPNs5WoV+Wr4kh09nu70vHVmSPji5KFUG+hmR"
+			"japsJsIJj+M0Zmd4EycKY8r0Ea3D4XO/uvloX4VHVPsDZkm8Kria"
+			"n5iNy6BgApVlebx0zQxto0GkgvPBq1nhoZxJNapLghGO7w==\r\n"
+			"rsaKey=BgIAAACkAABSU0ExAAQAAAEAAQDZaGCNzHjzrgNoCjyHK"
+			"a0TIkgmqE5kheNhZHs23TmAbHXN0dFwdNOqqDOTmTdoN1+zW6KY3"
+			"YkkwNypoZbDTR3sKdSdIDTNnftfHhRAlR9l4lNnnvfbUWRDqaGD2"
+			"nAkdasXXfD5c23COMvAEjLJXzwqZjNmj27ZgrrTlH9SoDPerg=="
+			"\r\nHWID=25D5A049380DDBA7AF3A96CC2DCB5986\r\n"
+			"region=CA\r\n",
+		.part_trail = PART_TRAIL_NONE,
+		.soft_ver = NULL,
+		.soft_ver_compat_level = 1,
+
+		.partitions = {
+			{"fs-uboot", 0x00000, 0x20000},
+			{"partition-table", 0x20000, 0x02000},
+			{"default-mac", 0x30000, 0x01000},
+			{"support-list", 0x31000, 0x00100},
+			{"product-info", 0x31100, 0x00400},
+			{"soft-version", 0x32000, 0x00100},
+			{"firmware", 0x40000, 0xd80000},
+			{"user-config", 0xdc0000, 0x30000},
+			{"mutil-log", 0xf30000, 0x80000},
+			{"oops", 0xfb0000, 0x40000},
+			{"radio", 0xff0000, 0x10000},
+			{NULL, 0, 0}
+		},
+
+		.first_sysupgrade_partition = "os-image",
+		.last_sysupgrade_partition = "file-system"
+	},
+
 	/** Firmware layout for the EAP225 v3 */
 	{
 		.id     = "EAP225-V3",
@@ -2431,6 +2473,16 @@ static struct image_partition_entry make_support_list(
 	);
 }
 
+/** Generates the product-info partition */
+static struct image_partition_entry make_product_info(
+	const struct device_info *info
+) {
+	uint32_t len = strlen(info->product_info);
+	return init_meta_partition_entry(
+		"product-info", info->product_info, len, info->part_trail
+	);
+}
+
 /** Partition with extra-para data */
 static struct image_partition_entry make_extra_para(
 	const struct device_info *info, const uint8_t *extra_para, size_t len
@@ -2734,7 +2786,10 @@ static void build_image(const char *output,
 		parts[5] = make_extra_para(
 			info, extra_para, sizeof(extra_para)
 		);
+	} else if (strcasecmp(info->id, "EAP225-OUTDOOR-V1-CA") == 0) {
+		parts[5] = make_product_info(info);
 	}
+
 
 	size_t len;
 	void *image;
